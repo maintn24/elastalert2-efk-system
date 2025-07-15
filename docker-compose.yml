@@ -1,0 +1,68 @@
+services:
+  web:
+    image: httpd # Use the official HTTPD image
+    ports:
+      - "8080:80"
+    depends_on:
+      - fluentd
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: httpd.access
+
+  fluentd:
+    build: ./fluentd
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+    depends_on:
+      # Launch fluentd after that elasticsearch is ready to connect
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.3
+    container_name: elasticsearch
+    hostname: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Disable security for testing
+    healthcheck:
+      # Check whether service is ready
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+    ports:
+      - 9200:9200
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.0.3
+    depends_on:
+      # Launch fluentd after that elasticsearch is ready to connect
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "5601:5601"
+
+  
+  elastalert:
+    image: jertel/elastalert2:2.25.0
+    container_name: elastalert
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ./elastalert/rules:/opt/elastalert/rules
+      - ./elastalert/config.yaml:/opt/elastalert/config.yaml:ro
+      - ./elastalert/smtp_auth.yaml:/opt/elastalert/smtp_auth.yaml:ro
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch # Hostname of the Elasticsearch service in Docker Compose
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_SSL=false # Set to true if using SSL 
+      - TZ=UTC
+    command: ["--verbose", "--config", "/opt/elastalert/config.yaml"]
+    

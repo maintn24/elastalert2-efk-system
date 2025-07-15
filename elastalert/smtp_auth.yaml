@@ -1,0 +1,4 @@
+user: "sender@gmail.com"
+password: "your password here"
+# If you want to use Gmail, you need to create an App Password
+# and use it here instead of your regular password.

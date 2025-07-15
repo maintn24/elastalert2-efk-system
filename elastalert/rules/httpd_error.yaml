@@ -1,0 +1,14 @@
+# ./elastalert/rules/httpd_error.yaml
+name: HTTPD Error Alert
+type: frequency
+index: fluentd-*
+num_events: 3
+timeframe:
+  minutes: 1
+filter:
+- term:
+    log: "error"
+alert:
+- "email"
+email:
+- "receiver@gmail.com"
