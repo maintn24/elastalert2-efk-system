@@ -43,11 +43,6 @@ This application consists of the following components:
 
 1. Clone the repository and navigate to the project directory
 
-2. Copy the environment file:
-   ```bash
-   cp .env.example .env
-   ```
-
 3. Configure your email settings (see Configuration section above)
 
 4. Start the application:
