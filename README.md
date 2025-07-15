@@ -32,7 +32,7 @@ This application consists of the following components:
 1. Create a Gmail App Password:
    - Go to your Google Account settings
    - Enable 2-factor authentication
-   - Generate an App Password for this application
+   - Generate an App Password for this application: https://myaccount.google.com/apppasswords
 
 2. Update the email configuration in the elastalert files:
    - Edit `elastalert/smtp_auth.yaml` with your sender Gmail credentials
